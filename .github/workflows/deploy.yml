@@ -26,11 +26,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm ci
+
+      # index.html은 오프라인용 단일 파일 빌드본이므로, Vite 빌드는 개발용 진입점(index.dev.html)으로 실행
+      - name: Use dev entry for build
+        run: cp index.dev.html index.html
 
       - name: Build static site
         run: npm run build
