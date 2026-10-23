@@ -1,11 +1,133 @@
-<div align="center">
+# TAXIS — Tax Analysis & Intelligence Simulator
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+> **"세금을 이해하고, 절세를 설계하다."**
+> 대한민국 근로소득 연말정산 및 맞벌이 부부 합산 절세 시뮬레이터 (2026년 귀속 · 2027년 초 정산)
 
-  <h1>Built with AI Studio</h2>
+---
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## 1. 프로젝트 개요
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+**TAXIS (Tax Analysis & Intelligence Simulator)**는 대한민국 근로소득자가 매년 1~2월에 진행하는 연말정산의 구조를 명확히 이해하고, 최적의 부부 간 지출 배분 및 연금·금융상품 활용 전략을 수립할 수 있도록 돕는 전문 세무 분석 웹 애플리케이션입니다.
 
-</div>
+- **완전한 클라이언트 정적 웹(Static Web)**: 모든 세무 계산이 사용자의 브라우저 내에서만 실행되며, 개인의 소득·세금 정보가 외부 서버로 절대 전송되지 않습니다.
+- **GitHub Pages 100% 호환**: 별도의 유료 백엔드, 데이터베이스, 외부 API 없이 정적 호스팅(GitHub Pages)의 루트 및 서브 디렉토리 하위 경로에서도 원활히 동작합니다.
+- **2026년 귀속 세법 정밀 반영**:
+  - 소득세법 제47조 (근로소득공제 2,000만원 상한)
+  - 소득세법 제55조 (8단계 초과누진세율 6% ~ 45%)
+  - 소득세법 제59조 (근로소득세액공제 총급여별 한도)
+  - 조세특례제한법 제126조의2 (신용카드 등 소득공제 25% 문턱 및 자녀 가산 한도)
+  - 소득세법 제59조의3 (연금계좌 600만/900만 공제 및 15%/12% 공제율)
+  - 조세특례제한법 제91조의18 (ISA 만기금 연금계좌 이전 시 10% 최대 300만원 한도 추가)
+  - 소득세법 제59조의2 (2026년 귀속 9세 이상 적격 자녀세액공제 1인 25만 / 2인 55만 / 3인 이상 55만+(N-2)×40만)
+  - 소득세법 제97조의2 (해외주식 부부간 증여 1년 이내 이월과세 및 10년 6억원 증여공제)
+
+---
+
+## 2. 파일 구조 (Modular Architecture)
+
+```
+/
+├── index.html                  # HTML5 메타 태그, 폰트 및 진입점
+├── metadata.json               # 애플리케이션 메타데이터
+├── package.json                # 의존성 및 빌드 스크립트
+├── tsconfig.json               # TypeScript 번들러 환경설정
+├── vite.config.ts              # Vite 설정 (base: './' 적용으로 GitHub Pages 호환)
+├── README.md                   # 서비스 매뉴얼 및 배포 지침서
+└── src/
+    ├── main.tsx                # React 19 마운트 진입점
+    ├── App.tsx                 # 메인 화면 및 9단계 탭/단계 제어
+    ├── index.css               # Tailwind CSS 설정
+    ├── types.ts                # 세무 계산 및 데이터 모델 타입 정의
+    ├── tax-engine.ts           # 100% 독립적인 세무 계산 엔진 및 테스트 러너
+    ├── validation.ts           # 입력값 유효성 검사 및 안내 메시지
+    ├── tax-rules/              # 연도별 세법 상수 및 법령 근거
+    │   ├── 2026.ts             # 2026년 귀속 공식 법령 상수 및 조문
+    │   └── index.ts            # 다년도(2026, 2027, 2028) 레지스트리
+    └── components/
+        ├── Header.tsx          # 브랜드 헤더, 귀속연도 선택기, 배지
+        ├── TaxFlowchart.tsx    # 6단계 세무 흐름 시각화 다이어그램
+        ├── StepNavigation.tsx  # 반응형 단계별 탭 내비게이션
+        ├── Step1Salary.tsx     # STEP 1: 급여 및 기납부세액 입력
+        ├── Step2Family.tsx     # STEP 2: 인적공제 및 공적연금보험료
+        ├── Step3Card.tsx       # STEP 3: 카드 소득공제 & 부부 지출 배분 최적화 SVG 차트
+        ├── Step4TaxBase.tsx    # STEP 4: 과세표준 및 산출세액 흐름
+        ├── Step5TaxCredits.tsx # STEP 5: 연금·의료·교육·자녀 세액공제 & 6종 프리셋
+        ├── Step6ISA.tsx        # STEP 6: ISA 만기 이전 & 놓치기 쉬운 7대 공제 점검
+        ├── Step7Settlement.tsx # STEP 7: 결정세액 정산, 공개예시 검산 & 국세청 대조 CSV
+        ├── Step8Strategy.tsx   # STEP 8: 종합 절세액 분해, 맞춤 실행 체크리스트 & 인쇄
+        ├── Step9StockAppendix.tsx # STEP 9 (Appendix): 해외주식 부부간 증여 절세
+        └── AuditSection.tsx    # 25개 핵심 산식 자동 점검 엔진 (PASS/FAIL) & CSV
+```
+
+---
+
+## 3. GitHub Pages 배포 가이드
+
+본 프로젝트는 순수 정적 웹 애플리케이션으로 빌드되어 GitHub Pages에 즉시 배포할 수 있습니다.
+
+### 배포 준비
+`vite.config.ts` 파일에 `base: './'` 설정이 적용되어 있어 `https://<사용자이름>.github.io/<저장소이름>/` 형태의 서브 디렉토리 하위 경로에서도 정적 자원(CSS, JS)이 완벽하게 로드됩니다.
+
+### 단계별 배포 절차
+1. **GitHub 저장소 생성**:
+   GitHub에서 신규 Repository(예: `taxis-simulator`)를 생성합니다.
+2. **코드 커밋 및 푸시**:
+   ```bash
+   git init
+   git add .
+   git commit -m "feat: release TAXIS 2026 v1.4"
+   git branch -M main
+   git remote add origin https://github.com/<사용자이름>/<저장소이름>.git
+   git push -u origin main
+   ```
+3. **정적 빌드 생성**:
+   ```bash
+   npm run build
+   ```
+   빌드 결과물은 `dist` 디렉토리에 생성됩니다.
+4. **GitHub Actions 배포 설정 (권장)**:
+   저장소의 `.github/workflows/deploy.yml`을 생성하여 `dist/` 폴더를 GitHub Pages로 자동 배포합니다.
+   또는 `main` 브랜치의 `/` 경로에 정적 파일을 커밋하거나 `gh-pages` 브랜치를 사용합니다.
+5. **GitHub 저장소 설정**:
+   - 저장소 상단 탭에서 **Settings** → 좌측 메뉴 **Pages** 이동
+   - **Build and deployment** 항목의 **Source**에서 `Deploy from a branch` 선택
+   - **Branch** 설정에서 `main` 브랜치와 `/(root)` 또는 배포 브랜치 선택 후 **Save**
+6. **배포 완료 확인**:
+   약 1~2분 후 Settings → Pages 화면 상단에 배포 URL(`https://<username>.github.io/<repo>/`)이 활성화됩니다.
+
+---
+
+## 4. 세법 계산 엔진 및 자체 점검 (Audit Engine)
+
+TAXIS는 총 25개의 공식 세법 경계값 및 산식 항등식에 대한 자체 자동 점검(Automated Audit Suite)을 내장하고 있습니다.
+
+1. **근로소득공제 5개 구간 경계값 및 2,000만원 상한 검증**
+2. **8단계 기본 종합소득세율(6%~45%) 구간 경계값 검증**
+3. **근로소득세액공제(총급여 3,300만, 7,000만, 1억 2,000만원 한도 감소 곡선) 검증**
+4. **연금저축(600만) 및 IRP 합산(900만) 공제대상 한도 및 소득구간별 공제율(12%/15%) 검증**
+5. **신용카드 25% 총급여 문턱 및 자녀 가산 한도(250만~400만) 검증**
+6. **2026년 귀속 자녀세액공제(2자녀 55만원 등) 검증**
+7. **산출세액 범위 내 세액공제 차감 제한 검증**
+8. **절세액 항등식(소득공제 절세분 + 세액공제 절세분 = 총 절세액) 검증**
+
+화면 하단의 **"산식 점검 실행"** 버튼을 클릭하여 언제든지 25개 테스트의 통과 여부를 즉시 검증할 수 있으며, **"CSV 다운로드"** 버튼을 통해 결과를 보고서 파일로 추출할 수 있습니다.
+
+---
+
+## 5. 다년도(2027, 2028년) 확장 설계 원칙
+
+TAXIS는 "미래 연도 세법을 현재 규칙으로 임의 계산하지 않는다"는 품질 원칙을 엄격히 준수합니다.
+
+- `src/tax-rules/` 폴더에 연도별 파일(`2026.ts`, `2027.ts`, `2028.ts`)이 완전하게 분리되어 있습니다.
+- 새로운 귀속연도 세법이 국회 본회의를 통과하고 대통령령으로 공포되면:
+  1. 신규 연도 규칙 파일(`src/tax-rules/2027.ts`)을 생성하여 개정 법령 상수 및 조문을 정의합니다.
+  2. `src/tax-rules/index.ts` 레지스트리에서 해당 연도의 `isVerified`를 `true`로 전환합니다.
+  3. 전용 테스트 케이스를 등록하여 통과 검증 후 사용자에게 오픈합니다.
+
+---
+
+## 6. 개인정보 보호 및 보안 고지
+
+- **서버 미전송**: 본 서비스는 백엔드 데이터베이스나 원격 서버와 통신하지 않으며, 사용자가 입력한 급여, 가족 수, 카드 지출액, 세금 정보는 오직 사용자의 브라우저 메모리 내에서만 처리됩니다.
+- **오프라인 동작**: 인터넷 연결이 차단된 환경에서도 브라우저 내에서 모든 시뮬레이션 및 CSV 내보내기, 인쇄 기능이 정상 작동합니다.
+- **법적 한계 고지**: 본 서비스의 결과는 근로소득자의 절세 의사결정 수립을 위한 추정치이며, 회사 원천징수영수증 및 홈택스 공식 세액 신고서와는 특례 적용 여부 등에 따라 차이가 발생할 수 있습니다.

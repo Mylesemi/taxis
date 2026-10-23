@@ -1,0 +1,6 @@
+{
+  "name": "TAXIS - Tax Analysis & Intelligence Simulator",
+  "description": "대한민국 근로소득 연말정산 및 부부 합산 절세 시뮬레이터 (TAXIS 2026). 세금을 이해하고, 절세를 설계하다.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
